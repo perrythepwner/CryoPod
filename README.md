@@ -1,4 +1,4 @@
-# Launchpad
+# CryoPod
 
 ![img](./assets/ChallengeBanner.png)
 ---
