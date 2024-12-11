@@ -8,16 +8,18 @@ FROM hexpm/elixir:1.17.3-erlang-27.1-alpine-3.20.3 as runner
 
 COPY ./backend/requirements.txt /tmp/requirements.txt
 
+RUN apk add --no-cache git 
 RUN apk --no-cache --update add \
+    linux-headers \
+    git \
+    gcompat \
+    libstdc++ \
     bash \
     python3 \
     py3-pip \
     nodejs \
     curl \
     socat \
-    jq \
-    unzip \
-    git \
     envsubst \
     postgresql15 \
     redis \
@@ -28,7 +30,7 @@ RUN python3 -m pip install --break-system-packages --no-cache-dir -r /tmp/requir
     rm -rf /tmp/requirements.txt
 
 RUN addgroup -S blockscout && adduser -S blockscout -G blockscout
-RUN addgroup -S ctf && adduser -S ctf -G ctf
+RUN addgroup -S ctf && adduser -S ctf -G ctf -s /bin/bash
 
 COPY ./backend/entrypoint.sh /
 COPY ./backend/eth_sandbox/ /usr/lib/python/eth_sandbox/
@@ -48,32 +50,31 @@ COPY --from=foundry /usr/local/bin/cast /usr/local/bin/cast
 COPY --from=foundry /usr/local/bin/anvil /usr/local/bin/anvil
 COPY --from=foundry /usr/local/bin/chisel /usr/local/bin/chisel
 
-# TODO
-#RUN true && \
-#    cd /home/ctf/backend/contracts/ && \
-#    forge build --out ./compiled && \
-#    true
+RUN chmod +x /entrypoint.sh \
+    && mkdir -p /var/log/ctf/ \
+    && touch /var/log/ctf/challenge_bot.log \
+    && touch /var/log/ctf/anvil_output.log \ 
+    && chown -R ctf:ctf /var/log/ctf/ \
+    && chmod 777 /var/log/ctf/ \
+    && chown -R ctf:ctf /home/ctf/ \
+    && chown -R blockscout:blockscout /home/ctf/blockscout_backend/ \
+    && chown -R blockscout:blockscout /home/ctf/blockscout_frontend/ \
+    && chmod -R 777 /home/ctf/blockscout_frontend/public \
+    && chmod -R 777 /home/ctf/blockscout_frontend/.next \
+    && chmod -R 777 /home/ctf/blockscout_frontend/deploy \
+    && mkdir -p /run/postgresql/ \
+    && chown -R postgres:postgres /run/postgresql/ \
+    && chown -R postgres:postgres /var/lib/postgresql/ \
+    && su postgres -c "chmod 0700 /var/lib/postgresql/data/"
+
+RUN true && \
+    cd /home/ctf/backend/contracts/ && \
+    forge build --out ./compiled && \
+    true
 
 ENV PYTHONPATH=/usr/lib/python/
 ENV PYTHONUNBUFFERED=1
 
-RUN chmod +x /entrypoint.sh && \
-    mkdir -p /var/log/ctf/ && \
-    chown -R ctf:ctf /var/log/ctf/ && \
-    chmod 777 /var/log/ctf/ && \
-    chown -R ctf:ctf /home/ctf/ && \
-    chown -R blockscout:blockscout /home/ctf/blockscout_backend/ && \
-    chown -R blockscout:blockscout /home/ctf/blockscout_frontend/ && \
-    chmod -R 777 /home/ctf/blockscout_frontend/public && \
-    chmod -R 777 /home/ctf/blockscout_frontend/.next && \
-    chmod -R 777 /home/ctf/blockscout_frontend/deploy && \
-    mkdir -p /run/postgresql/ && \
-    chown -R postgres:postgres /run/postgresql/ && \
-    chown -R postgres:postgres /var/lib/postgresql/ && \
-    su postgres -c "chmod 0700 /var/lib/postgresql/data/"
-
-EXPOSE 80
 USER root
 WORKDIR /home/ctf/
-
 ENTRYPOINT [ "/entrypoint.sh" ]

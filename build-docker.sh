@@ -5,7 +5,7 @@ set -o allexport
 ########### ENV VARS ###########
 NAME=cryopod
 IMAGE=blockchain_${NAME}
-FLAG=HTB{pl4c3h0ld3r}
+FLAG=HTB{h3ll0_ch41n_sc0ut3r}
 PUBLIC_IP=127.0.0.1
 HANDLER_PORT=8000
 LOCAL_RPC_PORT=5000
