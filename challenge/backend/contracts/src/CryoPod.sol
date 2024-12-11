@@ -9,13 +9,13 @@ pragma solidity ^0.8.0;
 contract CryoPod {
     mapping(address => string) private pods;
 
-    event PodStored(address indexed user, string indexed data);
+    event PodStored(address indexed user, string data);
 
     /**
      * @dev Stores or updates the caller's pod with the provided data.
      * @param _data The information to be stored in the user's pod.
      */
-    function storePod(string calldata _data) external {
+    function storePod(string memory _data) external {
         pods[msg.sender] = _data;
         emit PodStored(msg.sender, _data);
     }
