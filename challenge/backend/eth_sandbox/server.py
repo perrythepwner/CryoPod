@@ -104,7 +104,7 @@ def launch_node() -> Dict:
     node_port = str(random.randrange(30000, 60000))
     mnemonic = generate_mnemonic(12, "english")
 
-    with open(Config.ANVIL_LOGFILE, "a") as logfile:
+    with open(Config.ANVIL_LOGFILE, "w") as logfile:
         proc = subprocess.Popen(
             args=[
                 "anvil",
@@ -216,15 +216,31 @@ def proxy():
     if not body:
         return "invalid content type, only application/json is supported"
 
-    # TODO
-    #if "id" not in body or "method" not in body or not isinstance(body["method"], str):
-    #    return jsonify(INVALID_REQUEST), 400
+    # batch requests
+    if isinstance(body, list):
+        for req in body:
+            if "id" not in req or "method" not in req or not isinstance(req["method"], str):
+                app.logger.info(f"[*] Invalid request: {req}, {type(req)=}")
+                return jsonify(INVALID_REQUEST), 400
+            
+            if not any(req["method"].startswith(namespace) for namespace in Config.ALLOWED_NAMESPACES):
+                app.logger.info(f"[*] Method not allowed: {req['method']}")
+                return jsonify(METHOD_NOT_ALLOWED), 403
+            
+            if req["method"] == "eth_sendUnsignedTransaction":
+                return jsonify(METHOD_NOT_ALLOWED), 403
 
-    #if not any(body["method"].startswith(namespace) for namespace in Config.ALLOWED_NAMESPACES):
-    #    return jsonify(METHOD_NOT_ALLOWED), 403
-
-    #if body["method"] == "eth_sendUnsignedTransaction":
-    #    return jsonify(METHOD_NOT_ALLOWED), 403
+    else:
+        if "id" not in body or "method" not in body or not isinstance(body["method"], str):
+            app.logger.info(f"[*] Invalid request: {body}, {type(body)=} {isinstance(body, dict)=} {isinstance(body, list)=}")
+            return jsonify(INVALID_REQUEST), 400
+    
+        if not any(body["method"].startswith(namespace) for namespace in Config.ALLOWED_NAMESPACES):
+            app.logger.info(f"[*] Method not allowed: {body['method']}")
+            return jsonify(METHOD_NOT_ALLOWED), 403
+    
+        if body["method"] == "eth_sendUnsignedTransaction":
+            return jsonify(METHOD_NOT_ALLOWED), 403
 
     # proxy the request to the local node
     resp = requests.post(f"http://localhost:{node_info['port']}", json=body)
@@ -267,5 +283,4 @@ def connectionInfo():
 
 
 if __name__ == "__main__":
-    launch_node()
     app.run(host="0.0.0.0", port=Config.LOCAL_RPC_PORT)

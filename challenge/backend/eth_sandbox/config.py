@@ -12,11 +12,11 @@ class Config:
     ANVIL_LOGFILE: str = "/var/log/ctf/anvil_output.log"
     FLAG: str = os.getenv("FLAG", "HTB{pl4c3h0ld3r}")
     
-    ALLOWED_NAMESPACES: list = ["web3", "eth", "net"]
+    ALLOWED_NAMESPACES: list = ["web3", "eth", "net", "debug", "txpool"]
     RECEIPT_POLL_INTERVAL: float = 0.1
     N_ACCOUNTS: int = 2
     N_BOTS: int = 5
     DEPLOYER_BALANCE: int = 1000 # ETH
-    PLAYER_BALANCE: int = 500 # ETH
-    BOT_BALANCE: int = 1 # ETH
-    SETUP_CONTRACT_BALANCE: int = 101 # ETH
+    PLAYER_BALANCE: int = 10 # ETH
+    BOT_BALANCE: int = 10 # ETH
+    SETUP_CONTRACT_BALANCE: int = 0 # ETH
