@@ -190,7 +190,7 @@ def is_solved_checker(web3: Web3) -> bool:
 
 @app.route("/", methods=["GET"])
 def index():
-    return "sandbox is running!"
+    return "rpc is running!"
 
 
 @app.route("/restart", methods=["GET"])
