@@ -31,7 +31,6 @@ def new_connection_info_action():
         print(f"Player Address     : {data['PlayerAddress']}")
         print(f"Target contract    : {data['TargetAddress']}")
         print(f"Setup contract     : {data['SetupAddress']}")
-        print(f"RPC URL            : http://{PUBLIC_IP}:{Config.PUBLIC_RPC_PORT}/")
         return 0
 
     return Action(name="Get connection informations", handler=action)

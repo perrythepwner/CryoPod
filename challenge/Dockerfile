@@ -75,6 +75,11 @@ RUN true && \
 ENV PYTHONPATH=/usr/lib/python/
 ENV PYTHONUNBUFFERED=1
 
+EXPOSE 8000
+EXPOSE 5000
+EXPOSE 8080
+
 USER root
 WORKDIR /home/ctf/
+COPY ./config/.env.blockscout.evaluated .
 ENTRYPOINT [ "/entrypoint.sh" ]
